@@ -1,0 +1,10 @@
+.git/
+__pycache__/
+*.pyc
+*.pyo
+.env
+chroma_db/
+data/
+user_settings.json
+*.egg-info/
+.pytest_cache/

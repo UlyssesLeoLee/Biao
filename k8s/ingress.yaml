@@ -1,0 +1,33 @@
+# Sealos 部署说明：
+#   1. 将 host 改为你的 Sealos 子域名，格式: <app>.YOUR-NAMESPACE.sealos.run
+#   2. Sealos 会自动通过 cert-manager 签发 TLS 证书
+#   3. secretName 任意命名，cert-manager 会自动创建
+#
+# 其他 K8s 集群：修改 host 为你的域名，并配置 cert-manager 或手动管理 TLS。
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bidding-ai
+  namespace: bidding-ai
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: bidding-ai.YOUR-NAMESPACE.sealos.run    # <-- 修改这里
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: bidding-ai
+                port:
+                  number: 8501
+  tls:
+    - hosts:
+        - bidding-ai.YOUR-NAMESPACE.sealos.run       # <-- 修改这里
+      secretName: bidding-ai-tls

@@ -1,0 +1,10 @@
+.env
+user_settings.json
+chroma_db/
+data/
+__pycache__/
+*.pyc
+*.pyo
+k8s/secret.yaml
+*.egg-info/
+.pytest_cache/
