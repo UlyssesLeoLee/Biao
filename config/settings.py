@@ -12,13 +12,16 @@ SETTINGS_FILE = Path("./user_settings.json")
 
 
 class Settings(BaseModel):
-    api_provider: str = Field(default="openai", description="API提供商: openai | anthropic")
+    api_provider: str = Field(default="openai", description="API提供商: openai | anthropic | nvidia")
     openai_api_key: str = Field(default="", description="OpenAI API Key")
     openai_base_url: str = Field(default="https://api.openai.com/v1", description="OpenAI API Base URL")
     openai_model: str = Field(default="gpt-4o", description="OpenAI 模型名称")
     anthropic_api_key: str = Field(default="", description="Anthropic API Key")
     anthropic_model: str = Field(default="claude-opus-4-8", description="Anthropic 模型名称")
-    embedding_provider: str = Field(default="openai", description="Embedding提供商: openai | huggingface")
+    nvidia_api_key: str = Field(default="", description="NVIDIA NIM API Key (nvapi-...)")
+    nvidia_base_url: str = Field(default="https://integrate.api.nvidia.com/v1", description="NVIDIA NIM Base URL")
+    nvidia_model: str = Field(default="meta/llama-3.1-70b-instruct", description="NVIDIA 模型名称")
+    embedding_provider: str = Field(default="openai", description="Embedding提供商: openai | huggingface | nvidia")
     embedding_model: str = Field(default="text-embedding-3-small", description="Embedding模型")
     chroma_persist_dir: str = Field(default="./chroma_db", description="ChromaDB持久化目录")
     chroma_collection_name: str = Field(default="bidding_documents", description="ChromaDB集合名称")
@@ -42,6 +45,9 @@ class Settings(BaseModel):
             openai_model=os.getenv("OPENAI_MODEL", "gpt-4o"),
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", ""),
             anthropic_model=os.getenv("ANTHROPIC_MODEL", "claude-opus-4-8"),
+            nvidia_api_key=os.getenv("NVIDIA_API_KEY", ""),
+            nvidia_base_url=os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"),
+            nvidia_model=os.getenv("NVIDIA_MODEL", "meta/llama-3.1-70b-instruct"),
             embedding_provider=os.getenv("EMBEDDING_PROVIDER", "openai"),
             embedding_model=os.getenv("EMBEDDING_MODEL", "text-embedding-3-small"),
             chroma_persist_dir=os.getenv("CHROMA_PERSIST_DIR", "./chroma_db"),
@@ -58,11 +64,15 @@ class Settings(BaseModel):
     def get_llm_api_key(self) -> str:
         if self.api_provider == "anthropic":
             return self.anthropic_api_key
+        if self.api_provider == "nvidia":
+            return self.nvidia_api_key
         return self.openai_api_key
 
     def is_configured(self) -> bool:
         if self.api_provider == "anthropic":
             return bool(self.anthropic_api_key)
+        if self.api_provider == "nvidia":
+            return bool(self.nvidia_api_key)
         return bool(self.openai_api_key)
 
 

@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bidding-ai
+  namespace: bidding-ai
+  labels:
+    app: bidding-ai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bidding-ai
+  template:
+    metadata:
+      labels:
+        app: bidding-ai
+    spec:
+      containers:
+        - name: app
+          # Replace with your image: registry.cn-hangzhou.aliyuncs.com/<ns>/bidding-ai:latest
+          image: bidding-ai:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8501
+          envFrom:
+            - configMapRef:
+                name: bidding-ai-config
+            - secretRef:
+                name: bidding-ai-secrets
+          volumeMounts:
+            - name: chroma-storage
+              mountPath: /app/chroma_db
+            - name: data-storage
+              mountPath: /app/data
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+          livenessProbe:
+            httpGet:
+              path: /_stcore/health
+              port: 8501
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /_stcore/health
+              port: 8501
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: chroma-storage
+          persistentVolumeClaim:
+            claimName: chroma-pvc
+        - name: data-storage
+          persistentVolumeClaim:
+            claimName: data-pvc
